@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import "./App.css";
 
-const CONTRACT_ADDRESS = "0xCc2cd7488d8EA2bB37AA53Fb633cf91d9DFcC582";
-const CONTRACT_ABI = [
+const TOKEN_ADDRESS = "0xCc2cd7488d8EA2bB37AA53Fb633cf91d9DFcC582";
+const CONTRACT_ADDRESS = "0xEC2d12Fc1C9276428de8eE0811Eed68BB937626B";
+const TOKEN_URI =
+  "https://green-obedient-minnow-170.mypinata.cloud/ipfs/QmSf6QQ9bf5BTC1eYZBM2Hkef7sa66Z2zhcDwBsi9o6T5i";
+const TOKEN_ABI = [
   {
     inputs: [
       {
@@ -657,29 +660,41 @@ const CONTRACT_ABI = [
 
 function App() {
   const [provider, setProvider] = useState(null);
-  const [account, setAccount] = useState('');
+  const [account, setAccount] = useState("");
   const [contract, setContract] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [chainId, setChainId] = useState(null);
-  const [balance, setBalance] = useState('');
-  const [statusMsg, setStatusMsg] = useState('');
+  const [balance, setBalance] = useState("");
+  const [statusMsg, setStatusMsg] = useState("");
+
+  // name of chains
+  const ChainIdToName = {
+    80002: "Amoy",
+  };
+
+  function getChainName(chainId) {
+    return ChainIdToName[chainId] || "Unknown Chain";
+  }
 
   // Listener de mudanças na metamask
   useEffect(() => {
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', handleChainChanged);
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+      window.ethereum.on("chainChanged", handleChainChanged);
     }
     return () => {
       if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        window.ethereum.removeListener('chainChanged', handleChainChanged);
+        window.ethereum.removeListener(
+          "accountsChanged",
+          handleAccountsChanged
+        );
+        window.ethereum.removeListener("chainChanged", handleChainChanged);
       }
-    }
+    };
   }, []);
 
   function handleAccountsChanged(accounts) {
-    console.log('account changed', accounts[0]);
+    console.log("account changed", accounts[0]);
     if (accounts.length > 0) {
       setAccount(accounts[0]);
       setIsConnected(true);
@@ -689,72 +704,126 @@ function App() {
   }
 
   function handleChainChanged(chainId) {
-    console.log('chainId', chainId);
+    console.log("chainId", chainId);
     setChainId(chainId);
   }
 
   async function connectWallet() {
-    	try {
-        if (!window.ethereum) {
-          alert('Metamask is not installed. Please install it to use this app.');
-          return;
-        }
-
-        // Caso a wallet esteja instalada, efetua-se a conexão
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        console.log('Connected accounts:', accounts);
-        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-        console.log('Chain Id:', chainId);
-        const providerInstance = new ethers.providers.Web3Provider(window.ethereum);
-        const contractInstance = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, providerInstance.getSigner());
-
-        setAccount(accounts[0]);
-        setProvider(providerInstance);
-        setContract(contractInstance);
-        setChainId(chainId);
-        setIsConnected(true);
-        // Carregando o saldo da rede
-        const chainBalance = await providerInstance.getBalance(accounts[0]);
-        const balanceInEth = ethers.utils.formatEther(chainBalance);
-        console.log('chain balance:', balanceInEth);
-        setBalance(balanceInEth);
-        setStatusMsg('Wallet connected successfully.');
-      } catch (error) {
-        console.error("Failed to connect wallet:", error);
-        setStatusMsg(`Failed to connect ${error}`);
+    try {
+      if (!window.ethereum) {
+        alert("Metamask is not installed. Please install it to use this app.");
+        return;
       }
+
+      // Caso a wallet esteja instalada, efetua-se a conexão
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      console.log("Connected accounts:", accounts);
+      const chainIdx16 = await window.ethereum.request({
+        method: "eth_chainId",
+      });
+      const chainId = parseInt(chainIdx16, 16);
+      console.log("Chain Id:", chainId);
+      const providerInstance = new ethers.providers.Web3Provider(
+        window.ethereum
+      );
+      const contractInstance = new ethers.Contract(
+        TOKEN_ADDRESS,
+        TOKEN_ABI,
+        providerInstance.getSigner()
+      );
+
+      setAccount(accounts[0]);
+      setProvider(providerInstance);
+      setContract(contractInstance);
+      setChainId(chainId);
+      setIsConnected(true);
+      // Carregando o saldo da rede
+      const chainBalance = await providerInstance.getBalance(accounts[0]);
+      debugger;
+      const balanceInEth = ethers.utils.formatEther(chainBalance);
+      const balanceInEthFormatted = parseFloat(balanceInEth).toFixed(4);
+      console.log("chain balance:", balanceInEthFormatted);
+      setBalance(balanceInEthFormatted);
+      setStatusMsg("Wallet connected successfully.");
+    } catch (error) {
+      console.error("Failed to connect wallet:", error);
+      setStatusMsg(`Failed to connect ${error}`);
+    }
   }
 
   function disconnectWallet() {
-    setAccount('');
+    setAccount("");
     setProvider(null);
     setContract(null);
     setChainId(null);
     setIsConnected(false);
-    setBalance('');
-    setStatusMsg('Wallet disconnected');
-    console.log('Wallet disconnected');
+    setBalance("");
+    setStatusMsg("Wallet disconnected");
+    console.log("Wallet disconnected");
+  }
+
+  async function handleMintNFT() {
+    if (!contract) {
+      setStatusMsg("Conecte uma wallet.");
+      return;
+    }
+
+    try {
+      const tx = await contract.mintToMarketplace(CONTRACT_ADDRESS, TOKEN_URI);
+      console.log("Mint NFT transaction:", tx);
+      await tx.wait();
+      console.log("Transaction confirmed:", tx.hash);
+      setStatusMsg(
+        `NFT minting transaction sent! Hash: <a href="https://amoy.polygonscan.com/tx/${tx.hash}" target="_blank" rel="noopener noreferrer">${tx.hash}</a>`
+      );
+    } catch (error) {
+      console.error("Error minting NFT:", error);
+      setStatusMsg(`Error minting NFT: ${error.message || "Unknown error"}`);
+    }
   }
 
   return (
     <>
-      <div>hello web3</div>
-      <div>testing some web3 features</div>
+      <div>
+        <h3> hello web3</h3>
+      </div>
+      <div>
+        <h4>testing some web3 features</h4>
+      </div>
       {!isConnected ? (
         <>
           <button onClick={connectWallet}>Connect Wallet</button>
         </>
       ) : (
         <>
+          <p></p>
           <div>
-            <p>dados da wallet:</p>
-            <p>rede: {chainId}</p>
-            <p>conta: {account}</p>
-            <p>saldo: {balance}</p>
+            <div>
+              <label>Dados da wallet:</label>
+            </div>
+            <div>
+              <label>Rede:</label> {getChainName(chainId)}
+            </div>
+            <div>
+              <label>Conta:</label> {account}
+            </div>
+            <div>
+              <label>Saldo da rede:</label> {balance}
+            </div>
+            <div>
+              <label>NFTs:</label> {balance}
+            </div>
           </div>
           <div>
-            {statusMsg}
+            <p></p>
+            <button onClick={handleMintNFT} disabled={!isConnected}>
+              Mint NFT
+            </button>
           </div>
+          <p></p>
+          <div>{statusMsg}</div>
         </>
       )}
     </>
