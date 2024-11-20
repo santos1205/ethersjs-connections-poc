@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import "./App.css";
 
 const TOKEN_ADDRESS = "0xCc2cd7488d8EA2bB37AA53Fb633cf91d9DFcC582";
-const CONTRACT_ADDRESS = "0xEC2d12Fc1C9276428de8eE0811Eed68BB937626B";
+const CONTRACT_ADDRESS = "0xb1F2D1B02439fa0bc0Ef300679f398426a524f54";
 const TOKEN_URI =
   "https://green-obedient-minnow-170.mypinata.cloud/ipfs/QmSf6QQ9bf5BTC1eYZBM2Hkef7sa66Z2zhcDwBsi9o6T5i";
 const TOKEN_ABI = [
@@ -657,6 +657,7 @@ const TOKEN_ABI = [
     type: "function",
   },
 ];
+const CONTRACT_ABI = [];
 
 function App() {
   const [provider, setProvider] = useState(null);
@@ -775,12 +776,15 @@ function App() {
       console.log("Mint NFT transaction:", tx);
       await tx.wait();
       console.log("Transaction confirmed:", tx.hash);
-      setStatusMsg(
-        `NFT minting transaction sent! Hash: <a href="https://amoy.polygonscan.com/tx/${tx.hash}" target="_blank" rel="noopener noreferrer">${tx.hash}</a>`
-      );
+      // setStatusMsg(
+      //   `NFT minting transaction sent! Hash: <a href="https://amoy.polygonscan.com/tx/${tx.hash}" target="_blank" rel="noopener noreferrer">${tx.hash}</a>`
+      // );
+      alert(`SUCCESS!! NFT sent. tx: ${tx.hash}`);
+      console.log("tx: ", tx.hash, new Date());
     } catch (error) {
       console.error("Error minting NFT:", error);
-      setStatusMsg(`Error minting NFT: ${error.message || "Unknown error"}`);
+      alert(`error minting NFT: ${error.message}`);
+      //setStatusMsg(`Error minting NFT: ${error.message || "Unknown error"}`);
     }
   }
 
@@ -819,7 +823,7 @@ function App() {
           <div>
             <p></p>
             <button onClick={handleMintNFT} disabled={!isConnected}>
-              Mint NFT
+              Mint NFT to Marketplace
             </button>
           </div>
           <p></p>
