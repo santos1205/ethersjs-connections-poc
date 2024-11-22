@@ -567,17 +567,29 @@ function App() {
           {/* Add additional actions here */}
         </section>
 
-        <section className="nft-list">
+        <div className="nft-label">
           <h2>NFTs a Venda</h2>
-          <div className="nft-grid">
+        </div>
+
+        <section className="nft-list">
+          <div className="nft-list">
             {nftList.map((nft, index) => (
               <div key={index} className="nft-card">
                 <img
-                  src={nft.image || "https://via.placeholder.com/150"}
+                  src={nft.image}
                   alt={`NFT ${index}`}
+                  className="nft-image"
                 />
-                <p className="token-id">{`Token ID: ${nft.tokenId}`}</p>
-                <p className="price">{`Price: ${nft.valor} POL`}</p>
+                <div className="nft-details">
+                  <h3 className="nft-title">{nft.tokenId}</h3>
+                  <p className="nft-price">Price: {nft.valor} POL</p>
+                  <button
+                    className="buy-button"
+                    onClick={() => handleBuyNFT(nft)}
+                  >
+                    comprar
+                  </button>
+                </div>
               </div>
             ))}
           </div>
