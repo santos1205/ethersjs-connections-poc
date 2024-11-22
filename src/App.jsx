@@ -462,12 +462,13 @@ function App() {
     } catch (error) {
       console.error("Failed to connect wallet:", error);
       setStatusMsg(`Failed to connect ${error}`);
+      // necessário reconectar, pois muitas vezes a metamask não conecta corretamente.
+      connectWallet();
     }
   }
 
   function disconnectWallet() {
     setAccount("");
-    setProvider(null);
     setContract(null);
     setChainId(null);
     setIsConnected(false);
@@ -528,87 +529,57 @@ function App() {
   }
 
   return (
-    <>
-      <div>
-        <h3>TKN Marketplace</h3>
-      </div>
-      <div>
-        <h4>Aqui se pode comprar NFTs para jogar AGE OF TOKENS</h4>
-      </div>
-      {!isConnected ? (
-        <>
-          <button onClick={connectWallet}>Connect Wallet</button>
-        </>
-      ) : (
-        <>
-          <p></p>
-          <div>
-            <div>
-              <label>Dados da sua wallet:</label>
-            </div>
-            <div>
-              <label>Rede:</label> {getChainName(chainId)}
-            </div>
-            <div>
-              <label>Conta:</label> {account}
-            </div>
-            <div>
-              <label>Saldo da rede:</label> {balance}
-            </div>
-            <div>
-              <label>NFTs:</label> {balance}
-            </div>
-          </div>
-          <div>
-            <p></p>
-            <button onClick={handleMintNFT} disabled={!isConnected}>
-              Mint NFT to Marketplace
+    <div className="app">
+      <header className="header">
+        <h1>Decentralized NFT Marketplace {isConnected}</h1>
+        <div className="wallet-info">
+          {isConnected == true ? (
+            <>
+              <span className="account">{`Account: ${account}`}</span>
+              <span className="balance">{`Balance: ${balance} POL`}</span>
+              <button className="btn disconnect" onClick={disconnectWallet}>
+                Disconnect
+              </button>
+            </>
+          ) : (
+            <button className="btn connect" onClick={connectWallet}>
+              Connect Wallet
             </button>
+          )}
+        </div>
+      </header>
+
+      <main className="main-content">
+        <section className="status">
+          <p>{statusMsg}</p>
+        </section>
+
+        <section className="actions">
+          <button className="btn mint" onClick={handleMintNFT}>
+            Mint NFT
+          </button>
+          {/* Add additional actions here */}
+        </section>
+
+        <section className="nft-list">
+          <h2>Your NFTs</h2>
+          <div className="nft-grid">
+            {nftList.map((nft, index) => (
+              <div key={index} className="nft-card">
+                <img
+                  src={nft.image || "https://via.placeholder.com/150"}
+                  alt={`NFT ${index}`}
+                />
+                <p className="token-id">{`Token ID: ${nft.tokenId}`}</p>
+                <p className="price">{`Price: ${nft.price} ETH`}</p>
+              </div>
+            ))}
           </div>
-          <div>
-            <p></p>
-            <button onClick={getMarketNFTs}> List NFTs to sell</button>
-          </div>
-          <p></p>
-          <div>{statusMsg}</div>
-          <div>
-            <h4>Lista dos NFTs a venda</h4>
-          </div>
-          <p></p>
-          <table id="nftTable">
-            <thead>
-              <tr>
-                <th>Address</th>
-                <th>Token ID</th>
-                <th>Price (POL)</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {nftList.length > 0 ? (
-                nftList.map((nft, index) => (
-                  <tr key={nft.tokenId}>
-                    <td>{nft.nftAddresses}</td>
-                    <td style={{ textAlign: "center"}}>{nft.tokenId}</td>
-                    <td>{nft.valor}</td>
-                    <td>
-                      <button>
-                        comprar
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="3">Loading...</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </>
-      )}
-    </>
+        </section>
+      </main>
+    </div>
   );
+
 }
 
 export default App;
