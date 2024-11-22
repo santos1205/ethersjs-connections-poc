@@ -3,20 +3,21 @@ import { ethers } from "ethers";
 import "./App.css";
 
 const TOKEN_ADDRESS = "0xCc2cd7488d8EA2bB37AA53Fb633cf91d9DFcC582";
-const CONTRACT_ADDRESS = "0xb1F2D1B02439fa0bc0Ef300679f398426a524f54";
+const CONTRACT_ADDRESS = "0x84d3fc84Fca8d3Ad60E6b78d5dC4564204f5368A";
 const TOKEN_URI =
   "https://green-obedient-minnow-170.mypinata.cloud/ipfs/QmSf6QQ9bf5BTC1eYZBM2Hkef7sa66Z2zhcDwBsi9o6T5i";
-const TOKEN_ABI = [
+
+const CONTRACT_ABI = [
   {
     inputs: [
       {
         internalType: "string",
-        name: "name",
+        name: "_nftName",
         type: "string",
       },
       {
         internalType: "string",
-        name: "symbol",
+        name: "_nftSymbol",
         type: "string",
       },
       {
@@ -27,109 +28,6 @@ const TOKEN_ABI = [
     ],
     stateMutability: "nonpayable",
     type: "constructor",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "sender",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-    ],
-    name: "ERC721IncorrectOwner",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "operator",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "ERC721InsufficientApproval",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "approver",
-        type: "address",
-      },
-    ],
-    name: "ERC721InvalidApprover",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "operator",
-        type: "address",
-      },
-    ],
-    name: "ERC721InvalidOperator",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-    ],
-    name: "ERC721InvalidOwner",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "receiver",
-        type: "address",
-      },
-    ],
-    name: "ERC721InvalidReceiver",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "sender",
-        type: "address",
-      },
-    ],
-    name: "ERC721InvalidSender",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "ERC721NonexistentToken",
-    type: "error",
   },
   {
     inputs: [
@@ -154,18 +52,17 @@ const TOKEN_ABI = [
     type: "error",
   },
   {
+    inputs: [],
+    name: "ReentrancyGuardReentrantCall",
+    type: "error",
+  },
+  {
     anonymous: false,
     inputs: [
       {
         indexed: true,
         internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "approved",
+        name: "nftAddress",
         type: "address",
       },
       {
@@ -174,65 +71,20 @@ const TOKEN_ABI = [
         name: "tokenId",
         type: "uint256",
       },
-    ],
-    name: "Approval",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
       {
-        indexed: true,
+        indexed: false,
         internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "operator",
+        name: "buyer",
         type: "address",
       },
       {
         indexed: false,
-        internalType: "bool",
-        name: "approved",
-        type: "bool",
-      },
-    ],
-    name: "ApprovalForAll",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
         internalType: "uint256",
-        name: "_fromTokenId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "_toTokenId",
+        name: "price",
         type: "uint256",
       },
     ],
-    name: "BatchMetadataUpdate",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "MetadataUpdate",
+    name: "Bought",
     type: "event",
   },
   {
@@ -258,34 +110,9 @@ const TOKEN_ABI = [
     anonymous: false,
     inputs: [
       {
-        indexed: false,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "TokenMintedTo",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
         indexed: true,
         internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "to",
+        name: "nftAddress",
         type: "address",
       },
       {
@@ -294,15 +121,21 @@ const TOKEN_ABI = [
         name: "tokenId",
         type: "uint256",
       },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "price",
+        type: "uint256",
+      },
     ],
-    name: "Transfer",
+    name: "TokenAdded",
     type: "event",
   },
   {
     inputs: [
       {
         internalType: "address",
-        name: "to",
+        name: "nftAddress",
         type: "address",
       },
       {
@@ -311,38 +144,29 @@ const TOKEN_ABI = [
         type: "uint256",
       },
     ],
-    name: "approve",
+    name: "buyNFT",
     outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-    ],
-    name: "balanceOf",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
+    stateMutability: "payable",
     type: "function",
   },
   {
     inputs: [],
-    name: "contractURI",
+    name: "getAllContractNFTs",
     outputs: [
       {
-        internalType: "string",
+        internalType: "address[]",
         name: "",
-        type: "string",
+        type: "address[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "",
+        type: "uint256[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "",
+        type: "uint256[]",
       },
     ],
     stateMutability: "view",
@@ -350,41 +174,27 @@ const TOKEN_ABI = [
   },
   {
     inputs: [
+      {
+        internalType: "address",
+        name: "nftAddress",
+        type: "address",
+      },
       {
         internalType: "uint256",
         name: "tokenId",
         type: "uint256",
       },
     ],
-    name: "getApproved",
+    name: "getNFTDetails",
     outputs: [
       {
-        internalType: "address",
-        name: "",
-        type: "address",
+        internalType: "uint256",
+        name: "valor",
+        type: "uint256",
       },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "operator",
-        type: "address",
-      },
-    ],
-    name: "isApprovedForAll",
-    outputs: [
       {
         internalType: "bool",
-        name: "",
+        name: "isListed",
         type: "bool",
       },
     ],
@@ -392,71 +202,126 @@ const TOKEN_ABI = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "maxSupply",
-    outputs: [
+    inputs: [
       {
         internalType: "uint256",
         name: "",
         type: "uint256",
       },
     ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "marketplaceAddress",
-        type: "address",
-      },
-      {
-        internalType: "string",
-        name: "_tokenURI",
-        type: "string",
-      },
-    ],
-    name: "mintToMarketplace",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "name",
-    outputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "owner",
+    name: "listedNFTs",
     outputs: [
       {
         internalType: "address",
-        name: "",
+        name: "nftAddress",
         type: "address",
       },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
       {
         internalType: "uint256",
         name: "tokenId",
         type: "uint256",
       },
     ],
-    name: "ownerOf",
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_tokenURI",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "_valor",
+        type: "uint256",
+      },
+    ],
+    name: "mintNFT",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "nftContract",
+    outputs: [
+      {
+        internalType: "contract NFTFactory",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "nftMappingList",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "price",
+        type: "uint256",
+      },
+      {
+        internalType: "bool",
+        name: "isListed",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes",
+        name: "",
+        type: "bytes",
+      },
+    ],
+    name: "onERC721Received",
+    outputs: [
+      {
+        internalType: "bytes4",
+        name: "",
+        type: "bytes4",
+      },
+    ],
+    stateMutability: "pure",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
     outputs: [
       {
         internalType: "address",
@@ -478,175 +343,6 @@ const TOKEN_ABI = [
     inputs: [
       {
         internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "safeTransferFrom",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes",
-        name: "data",
-        type: "bytes",
-      },
-    ],
-    name: "safeTransferFrom",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "operator",
-        type: "address",
-      },
-      {
-        internalType: "bool",
-        name: "approved",
-        type: "bool",
-      },
-    ],
-    name: "setApprovalForAll",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes4",
-        name: "interfaceId",
-        type: "bytes4",
-      },
-    ],
-    name: "supportsInterface",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "symbol",
-    outputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "tokenId",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "tokenURI",
-    outputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "totalSupply",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "transferFrom",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
         name: "newOwner",
         type: "address",
       },
@@ -656,17 +352,23 @@ const TOKEN_ABI = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [],
+    name: "withdrawFunds",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ];
-const CONTRACT_ABI = [];
 
 function App() {
-  const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState("");
   const [contract, setContract] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [chainId, setChainId] = useState(null);
   const [balance, setBalance] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
+  const [nftList, setNftList] = useState([]);
 
   // name of chains
   const ChainIdToName = {
@@ -709,6 +411,19 @@ function App() {
     setChainId(chainId);
   }
 
+  async function getProvider() {
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      return provider;
+    } else {
+      console.error(
+        "Ethereum provider not found. Please install MetaMask or another wallet."
+      );
+      return null;
+    }
+  }
+
   async function connectWallet() {
     try {
       if (!window.ethereum) {
@@ -726,23 +441,19 @@ function App() {
       });
       const chainId = parseInt(chainIdx16, 16);
       console.log("Chain Id:", chainId);
-      const providerInstance = new ethers.providers.Web3Provider(
-        window.ethereum
-      );
+      const provider = await getProvider();
       const contractInstance = new ethers.Contract(
-        TOKEN_ADDRESS,
-        TOKEN_ABI,
-        providerInstance.getSigner()
+        CONTRACT_ADDRESS,
+        CONTRACT_ABI,
+        provider.getSigner()
       );
 
       setAccount(accounts[0]);
-      setProvider(providerInstance);
       setContract(contractInstance);
       setChainId(chainId);
       setIsConnected(true);
       // Carregando o saldo da rede
-      const chainBalance = await providerInstance.getBalance(accounts[0]);
-      debugger;
+      const chainBalance = await provider.getBalance(accounts[0]);
       const balanceInEth = ethers.utils.formatEther(chainBalance);
       const balanceInEthFormatted = parseFloat(balanceInEth).toFixed(4);
       console.log("chain balance:", balanceInEthFormatted);
@@ -772,29 +483,57 @@ function App() {
     }
 
     try {
-      const tx = await contract.mintToMarketplace(CONTRACT_ADDRESS, TOKEN_URI);
+      const tx = await contract.mintNFT(TOKEN_URI, 25);
       console.log("Mint NFT transaction:", tx);
       await tx.wait();
       console.log("Transaction confirmed:", tx.hash);
       // setStatusMsg(
       //   `NFT minting transaction sent! Hash: <a href="https://amoy.polygonscan.com/tx/${tx.hash}" target="_blank" rel="noopener noreferrer">${tx.hash}</a>`
       // );
-      alert(`SUCCESS!! NFT sent. tx: ${tx.hash}`);
+      alert(`SUCCESSO! NFT enviado tx: ${tx.hash}`);
       console.log("tx: ", tx.hash, new Date());
     } catch (error) {
-      console.error("Error minting NFT:", error);
-      alert(`error minting NFT: ${error.message}`);
+      console.error("Erro ao mintar NFT:", error);
+      alert(`erro ao mintar NFT: ${error.message}`);
       //setStatusMsg(`Error minting NFT: ${error.message || "Unknown error"}`);
+    }
+  }
+
+  async function getMarketNFTs() {
+    const provider = await getProvider();
+
+    try {
+      if (provider) {
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);  
+        const NFTS_ADDRESSES = ["0x81e3f429E3F85B5F7bd91CE50B839911cAe49013"];  
+  
+        // MY-TODO: LOOP
+        // const nftDetails = await contract.getNFTDetails(NFTS_ADDRESSES[0], 1);
+        // console.log('nft valor:', nftDetails[0].toNumber());
+        // console.log('nft isListed:', nftDetails[1]);
+        const [nftAddresses, tokenIds, valores] = await contract.getAllContractNFTs();
+        
+        const nftListResponse = nftAddresses.map((address, index) => ({
+          nftAddresses: address,
+          tokenId: tokenIds[index].toString(),
+          valor: ethers.utils.formatEther(valores[index])
+        }));
+
+        console.log("Listados NFTs a venda:", nftListResponse);
+        setNftList(nftListResponse);
+      }
+    } catch(error) {
+      console.error('error during load nfts: ', error.message);
     }
   }
 
   return (
     <>
       <div>
-        <h3> hello web3</h3>
+        <h3>TKN Marketplace</h3>
       </div>
       <div>
-        <h4>testing some web3 features</h4>
+        <h4>Aqui se pode comprar NFTs para jogar AGE OF TOKENS</h4>
       </div>
       {!isConnected ? (
         <>
@@ -805,7 +544,7 @@ function App() {
           <p></p>
           <div>
             <div>
-              <label>Dados da wallet:</label>
+              <label>Dados da sua wallet:</label>
             </div>
             <div>
               <label>Rede:</label> {getChainName(chainId)}
@@ -826,8 +565,46 @@ function App() {
               Mint NFT to Marketplace
             </button>
           </div>
+          <div>
+            <p></p>
+            <button onClick={getMarketNFTs}> List NFTs to sell</button>
+          </div>
           <p></p>
           <div>{statusMsg}</div>
+          <div>
+            <h4>Lista dos NFTs a venda</h4>
+          </div>
+          <p></p>
+          <table id="nftTable">
+            <thead>
+              <tr>
+                <th>Address</th>
+                <th>Token ID</th>
+                <th>Price (POL)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {nftList.length > 0 ? (
+                nftList.map((nft, index) => (
+                  <tr key={nft.tokenId}>
+                    <td>{nft.nftAddresses}</td>
+                    <td style={{ textAlign: "center"}}>{nft.tokenId}</td>
+                    <td>{nft.valor}</td>
+                    <td>
+                      <button>
+                        comprar
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3">Loading...</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </>
       )}
     </>
