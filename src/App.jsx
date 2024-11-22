@@ -459,12 +459,11 @@ function App() {
       const balanceInEth = ethers.utils.formatEther(chainBalance);
       const balanceInEthFormatted = parseFloat(balanceInEth).toFixed(4);
       console.log("chain balance:", balanceInEthFormatted);
-      setBalance(balanceInEthFormatted);
-      setStatusMsg("Wallet connected successfully.");
+      setBalance(balanceInEthFormatted);      
     } catch (error) {
       console.error("Failed to connect wallet:", error);
       setStatusMsg(`Failed to connect ${error}`);
-      // necessário reconectar, pois muitas vezes a metamask não conecta corretamente.
+      // necessário reconectar em caso de erro para forçar a conexão completa, pois muitas vezes a metamask não conecta corretamente.
       connectWallet();
     }
   }
@@ -535,7 +534,7 @@ function App() {
   return (
     <div className="app">
       <header className="header">
-        <h1>Decentralized NFT Marketplace {isConnected}</h1>
+        <h1>TKN Marketplace</h1>
         <div className="wallet-info">
           {isConnected == true ? (
             <>
@@ -555,18 +554,21 @@ function App() {
 
       <main className="main-content">
         <section className="status">
-          <p>{statusMsg}</p>
+          <p></p>
         </section>
 
         <section className="actions">
-          <button className="btn mint" onClick={handleMintNFT}>
-            Mint NFT
-          </button>
+          {/* Só irá exibir o botão para mintar para uma conta em específico */}
+          {account == "0x3ec80f490112ef4661c9b1e6e360ae19306201bb" && (
+            <button className="btn mint" onClick={handleMintNFT}>
+              Mint NFT
+            </button>
+          )}
           {/* Add additional actions here */}
         </section>
 
         <section className="nft-list">
-          <h2>Your NFTs</h2>
+          <h2>NFTs a Venda</h2>
           <div className="nft-grid">
             {nftList.map((nft, index) => (
               <div key={index} className="nft-card">
