@@ -384,6 +384,8 @@ function App() {
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", handleAccountsChanged);
       window.ethereum.on("chainChanged", handleChainChanged);
+
+      getMarketNFTs();
     }
     return () => {
       if (window.ethereum) {
@@ -506,18 +508,20 @@ function App() {
     try {
       if (provider) {
         const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);  
-        const NFTS_ADDRESSES = ["0x81e3f429E3F85B5F7bd91CE50B839911cAe49013"];  
-  
-        // MY-TODO: LOOP
+        
+        // MY-TODO: GET NFT DETAILS
+        // const NFTS_ADDRESSES = ["0x81e3f429E3F85B5F7bd91CE50B839911cAe49013"];  
         // const nftDetails = await contract.getNFTDetails(NFTS_ADDRESSES[0], 1);
         // console.log('nft valor:', nftDetails[0].toNumber());
         // console.log('nft isListed:', nftDetails[1]);
+
         const [nftAddresses, tokenIds, valores] = await contract.getAllContractNFTs();
         
         const nftListResponse = nftAddresses.map((address, index) => ({
           nftAddresses: address,
           tokenId: tokenIds[index].toString(),
-          valor: ethers.utils.formatEther(valores[index])
+          //valor: ethers.utils.formatEther(valores[index])
+          valor: valores[index].toNumber()
         }));
 
         console.log("Listados NFTs a venda:", nftListResponse);
@@ -571,7 +575,7 @@ function App() {
                   alt={`NFT ${index}`}
                 />
                 <p className="token-id">{`Token ID: ${nft.tokenId}`}</p>
-                <p className="price">{`Price: ${nft.price} ETH`}</p>
+                <p className="price">{`Price: ${nft.valor} POL`}</p>
               </div>
             ))}
           </div>
