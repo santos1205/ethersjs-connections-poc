@@ -1,4 +1,4 @@
-# Configuração do Botão de Mintagem de NFTs Iniciais
+# Exibição do Botão de Mintagem de NFTs Iniciais
 
 Para garantir que o botão **Mintar** funcione corretamente e permita a criação de NFTs iniciais, o desenvolvedor deve configurar o endereço da carteira onde os NFTs serão mintados e também os contratos da blockchain **Amoy**. Siga os passos abaixo para concluir a configuração:
 
