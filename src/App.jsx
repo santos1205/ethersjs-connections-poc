@@ -535,13 +535,27 @@ function App() {
           provider
         );
 
-        const [nftAddresses, tokenIds, valores] = await contract.getAllContractNFTs();        
-        const nftListResponse = nftAddresses.map((address, index) => ({
-          address: address,
-          tokenId: tokenIds[index].toString(),
-          //valor: ethers.utils.formatEther(valores[index])
-          valor: valores[index].toNumber(),
-        }));
+        const [nftAddresses, tokenIds, valores] = await contract.getAllContractNFTs();
+        
+        const NFTS_ADDRESSES = ["0x40980B5f4F7609fCD5A00426B6f7716CF5395A84"];
+
+        // Use Promise.all to wait for all promises to resolve
+        const nftListResponse = await Promise.all(
+          nftAddresses.map(async (address, index) => {
+            const nftDetails = await contract.getNFTDetails(
+              NFTS_ADDRESSES[0],
+              tokenIds[index]
+            );
+            const isListed = nftDetails[1];
+
+            return {
+              address: address,
+              tokenId: tokenIds[index].toString(),
+              valor: valores[index].toNumber(),
+              isListed,
+            };
+          })
+        );
 
         console.log("Listados NFTs a venda:", nftListResponse);
         setNftList(nftListResponse);
