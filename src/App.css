@@ -221,3 +221,20 @@
   color: #333;
   /* Optional: Adjust color */
 }
+
+.message-box {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fffae6;
+  color: #333;
+  border: 1px solid #ffd700;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transition: opacity 0.3s ease-in-out;
+}

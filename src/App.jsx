@@ -402,6 +402,19 @@ function App() {
     };
   }, []);
 
+  // UseEffect to clear the message after 5 seconds
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage(""); // Clear the message
+      }, 5000);
+
+      // Cleanup the timer on component unmount or message change
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
+
   function handleAccountsChanged(accounts) {
     console.log("account changed", accounts[0]);
     if (accounts.length > 0) {
@@ -463,7 +476,7 @@ function App() {
       const balanceInEth = ethers.utils.formatEther(chainBalance);
       const balanceInEthFormatted = parseFloat(balanceInEth).toFixed(4);
       console.log("chain balance:", balanceInEthFormatted);
-      setBalance(balanceInEthFormatted);      
+      setBalance(balanceInEthFormatted);
     } catch (error) {
       console.error("Failed to connect wallet:", error);
       setMessage(`Failed to connect ${error}`);
@@ -488,7 +501,7 @@ function App() {
       return;
     }
 
-    try {      
+    try {
       const tx = await contract.mintNFT(TOKEN_URI, 25);
       console.log("Mint NFT transaction:", tx);
       await tx.wait();
@@ -506,22 +519,23 @@ function App() {
   }
 
   // MY-TODO: GET NFT DETAILS
-  // const NFTS_ADDRESSES = ["0x81e3f429E3F85B5F7bd91CE50B839911cAe49013"];  
+  // const NFTS_ADDRESSES = ["0x81e3f429E3F85B5F7bd91CE50B839911cAe49013"];
   // const nftDetails = await contract.getNFTDetails(NFTS_ADDRESSES[0], 1);
   // console.log('nft valor:', nftDetails[0].toNumber());
   // console.log('nft isListed:', nftDetails[1]);
-
 
   async function getMarketNFTs() {
     const provider = await getProvider();
 
     try {
       if (provider) {
-        const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);  
-        
+        const contract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          CONTRACT_ABI,
+          provider
+        );
 
-        const [nftAddresses, tokenIds, valores] = await contract.getAllContractNFTs();
-        debugger
+        const [nftAddresses, tokenIds, valores] = await contract.getAllContractNFTs();        
         const nftListResponse = nftAddresses.map((address, index) => ({
           address: address,
           tokenId: tokenIds[index].toString(),
@@ -532,8 +546,8 @@ function App() {
         console.log("Listados NFTs a venda:", nftListResponse);
         setNftList(nftListResponse);
       }
-    } catch(error) {
-      console.error('error during load nfts: ', error.message);
+    } catch (error) {
+      console.error("error during load nfts: ", error.message);
     }
   }
 
@@ -542,40 +556,45 @@ function App() {
     console.log("nft tokenId", nft.tokenId);
     console.log("nft valor", nft.valor);
 
-    setMessage("processing purchase, please wait");
+    const provider = await getProvider();
+    
+    if (isConnected == false) {
+      setMessage("Please connect your wallet to buy.");
+      return;
+    }
+    debugger
 
-    // const provider = await getProvider();
-
-    // try {
-    //   if (provider) {
-    //     const contract = new ethers.Contract(
-    //       CONTRACT_ADDRESS,
-    //       CONTRACT_ABI,
-    //       provider
-    //     );
-
-    //     if (isConnected == false) {
-    //       alert("Please connect your wallet to buy.");
-    //       return;
-    //     }
-
+    try {
+      if (provider) {
+        const contract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          CONTRACT_ABI,
+          provider.getSigner()
+        );
 
 
-    //     await contract.buyNFT(nft.address, nft.tokenId, {
-    //       value: nft.valor
-    //     });
-
-    //     alert("NFT purchased successfully");
-    //   }
-    // } catch (error) {
-    //   alert("error during nft purchase");
-    //   console.error("error during buy a nfts: ", error.message);
-    // }
+        setMessage("processing purchase, please wait");
+        const tx = await contract.buyNFT(nft.address, nft.tokenId, {
+          value: nft.valor
+        });
+        
+        console.log("transaction sent:", tx);
+        await tx.wait();
+        setMessage("NFT purchased successfully");
+      }
+    } catch (error) {
+      setMessage("error during nft purchase");
+      console.error("error during buy a nfts: ", error.message);
+    }
   }
 
   return (
     <div className="app">
-      {message && <div className="message">{message}</div>}
+      {message && (
+        <div className="message-box">
+          <p>{message}</p>
+        </div>
+      )}
       {/* Display the message */}
       <header className="header">
         <h1>TKN Marketplace</h1>
@@ -640,7 +659,6 @@ function App() {
       </main>
     </div>
   );
-
 }
 
 export default App;
