@@ -15,3 +15,5 @@ Esses contratos são essenciais para realizar a mintagem dos NFTs e para a inter
 No diretório raiz do seu projeto, crie o arquivo `.env` (se ele ainda não existir) e insira as variáveis de ambiente necessárias, como o endereço da carteira e os endereços dos contratos.
 
 **Importante**: quando um novo contrato do TKNMarket for criado, o arquivo `.env` deve ser atualizado para garantir o funcionamento correto do projeto. Além disso, o endereço da conta do proprietário (que realizou o deploy) também precisa ser atualizado.
+
+Todo o conteúdo dos tokens (RWAs) de carro é carregado do **META-DADO** proveniente da blockchain. Isso significa que as informações dos tokens são dinâmicas e dependem do que está registrado no meta-dado da blockchain, garantindo dados atualizados e consistentes.
