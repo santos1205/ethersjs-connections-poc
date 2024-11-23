@@ -5,8 +5,8 @@ Para garantir que o botão **Mintar** funcione corretamente e permita a criaçã
 ## Informações da Blockchain
 
 - **Blockchain**: Amoy
-- **Endereço do contrato do token**: `0x40980B5f4F7609fCD5A00426B6f7716CF5395A84`
-- **Endereço do contrato do marketplace**: `0xE9436E39D744eBc67261B34210140ac86381C430`
+- **Endereço do contrato do token**: `0x6b4b30fd39082C1DB5727eEd04FEdA091D46D3b8`
+- **Endereço do contrato do marketplace**: `0x6a095F22B6d23583207CBbBcAF707F7D82154DA0`
 
 Esses contratos são essenciais para realizar a mintagem dos NFTs e para a interação com o marketplace.
 
