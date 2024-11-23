@@ -373,6 +373,9 @@ function App() {
   const [balance, setBalance] = useState("");
   const [message, setMessage] = useState("");
   const [nftList, setNftList] = useState([]);
+  const [marketPlaceVisible, setMarketPlaceVisible] = useState(true);
+
+const ownerAddress = import.meta.env.VITE_OWNER_ADDRESS; // Access the variable
 
   // name of chains
   const ChainIdToName = {
@@ -413,7 +416,6 @@ function App() {
       return () => clearTimeout(timer);
     }
   }, [message]);
-
 
   function handleAccountsChanged(accounts) {
     console.log("account changed", accounts[0]);
@@ -577,12 +579,11 @@ function App() {
     console.log("nft valor", nft.valor);
 
     const provider = await getProvider();
-    
+
     if (isConnected == false) {
       setMessage("Please connect your wallet to buy.");
       return;
     }
-    debugger
 
     try {
       if (provider) {
@@ -592,12 +593,11 @@ function App() {
           provider.getSigner()
         );
 
-
         setMessage("processing purchase, please wait");
         const tx = await contract.buyNFT(nft.address, nft.tokenId, {
-          value: nft.valor
+          value: nft.valor,
         });
-        
+
         console.log("transaction sent:", tx);
         await tx.wait();
         setMessage("NFT purchased successfully");
@@ -606,6 +606,14 @@ function App() {
       setMessage("error during nft purchase");
       console.error("error during buy a nfts: ", error.message);
     }
+  }
+
+  function handleGoToMarketplace() {
+    setMarketPlaceVisible(true);
+  }
+
+  function handleGoToMyPurchases() {
+    setMarketPlaceVisible(false);
   }
 
   return (
@@ -619,6 +627,14 @@ function App() {
       <header className="header">
         <h1>TKN Marketplace</h1>
         <div className="wallet-info">
+          <div className="header-buttons">
+            <button className="btn" onClick={handleGoToMarketplace}>
+              Marketplace
+            </button>
+            {/* <button className="btn" onClick={handleGoToMyPurchases}>
+              My Purchases
+            </button> */}
+          </div>
           {isConnected == true ? (
             <>
               <span className="account">{`Account: ${account}`}</span>
@@ -639,43 +655,81 @@ function App() {
           <p></p>
         </section>
 
-        <section className="actions">
-          {/* Só irá exibir o botão para mintar para uma conta em específico */}
-          {account == "0x3ec80f490112ef4661c9b1e6e360ae19306201bb" && (
-            <button className="btn mint" onClick={handleMintNFT}>
-              Mint NFT
-            </button>
-          )}
-          {/* Add additional actions here */}
-        </section>
+        {/* Marketplace section */}
+        {marketPlaceVisible && (
+          <section>
+            <section className="actions">
+              {/* Só irá exibir o botão para mintar para uma conta em específico */}
+              {account.toLowerCase() == ownerAddress.toLowerCase() && (
+                <button className="btn mint" onClick={handleMintNFT}>
+                  Mint NFT
+                </button>
+              )}
+              {/* Add additional actions here */}
+            </section>
 
-        <div className="nft-label">
-          <h2>NFTs a Venda</h2>
-        </div>
+            <div className="nft-label">
+              <h2>NFTs a Venda</h2>
+            </div>
 
-        <section className="nft-list">
-          <div className="nft-list">
-            {nftList.map((nft, index) => (
-              <div key={index} className="nft-card">
-                <img
-                  src={nft.image}
-                  alt={`NFT ${index}`}
-                  className="nft-image"
-                />
-                <div className="nft-details">
-                  <h3 className="nft-title">{nft.tokenId}</h3>
-                  <p className="nft-price">Price: {nft.valor} POL</p>
-                  <button
-                    className="buy-button"
-                    onClick={() => handleBuyNFT(nft)}
-                  >
-                    comprar
-                  </button>
-                </div>
+            <section className="nft-list">
+              <div className="nft-list">
+                {nftList.map((nft, index) => (
+                  <div key={index} className="nft-card">
+                    <img
+                      src={nft.image}
+                      alt={`NFT ${index}`}
+                      className="nft-image"
+                    />
+                    <div className="nft-details">
+                      <h3 className="nft-title">{nft.tokenId}</h3>
+                      <p className="nft-price">Price: {nft.valor} POL</p>
+                      <button
+                        className="buy-button"
+                        onClick={() => handleBuyNFT(nft)}
+                      >
+                        comprar
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
+            </section>
+          </section>
+        )}
+
+        {/* My purchases section */}
+        {!marketPlaceVisible && (
+          <section>
+            <div className="nft-label">
+              <h2>My Purchases</h2>
+            </div>
+
+            <section className="nft-list">
+              <div className="nft-list">
+                {nftList.map((nft, index) => (
+                  <div key={index} className="nft-card">
+                    <img
+                      src={nft.image}
+                      alt={`NFT ${index}`}
+                      className="nft-image"
+                    />
+                    <div className="nft-details">
+                      <h3 className="nft-title">{nft.tokenId}</h3>
+                      <p className="nft-price">Price: {nft.valor} POL</p>
+                      <button
+                        className="buy-button"
+                        onClick={() => handleBuyNFT(nft)}
+                      >
+                        comprar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </section>
+        )}
       </main>
     </div>
   );
