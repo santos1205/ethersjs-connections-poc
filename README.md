@@ -9,4 +9,4 @@ No diretório raiz do seu projeto, crie um arquivo chamado `.env` (caso não exi
 Exemplo:
 
 ```env
-REACT_APP_WALLET_ADDRESS=0xSeuEnderecoDeCarteiraAqui
+VITE_OWNER_ADDRESS=0xSeuEnderecoDeCarteiraAqui
