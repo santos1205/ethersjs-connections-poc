@@ -1,368 +1,25 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import axios from "axios";
+
 import "./App.css";
 
-const CONTRACT_ADDRESS = "0xE9436E39D744eBc67261B34210140ac86381C430";
+const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
+const NFT_ADDRESS = import.meta.env.VITE_NFT_ADDRESS;
 const TOKEN_URI =
-  "https://green-obedient-minnow-170.mypinata.cloud/ipfs/QmSf6QQ9bf5BTC1eYZBM2Hkef7sa66Z2zhcDwBsi9o6T5i";
+  "https://green-obedient-minnow-170.mypinata.cloud/ipfs/QmecaAa9MGY4QnVEtsEVvmLmszZcZGrFvSTiGg8eLxCzF3/eletric_suv.json";
 
 const CONTRACT_ABI = [
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "_nftName",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "_nftSymbol",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "_contractURI",
-        type: "string",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-    ],
-    name: "OwnableInvalidOwner",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "OwnableUnauthorizedAccount",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "ReentrancyGuardReentrantCall",
-    type: "error",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "nftAddress",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "buyer",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "price",
-        type: "uint256",
-      },
-    ],
-    name: "Bought",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferred",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "nftAddress",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "price",
-        type: "uint256",
-      },
-    ],
-    name: "TokenAdded",
-    type: "event",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "nftAddress",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "buyNFT",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getAllContractNFTs",
-    outputs: [
-      {
-        internalType: "address[]",
-        name: "",
-        type: "address[]",
-      },
-      {
-        internalType: "uint256[]",
-        name: "",
-        type: "uint256[]",
-      },
-      {
-        internalType: "uint256[]",
-        name: "",
-        type: "uint256[]",
-      },
-      {
-        internalType: "string[]",
-        name: "",
-        type: "string[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "nftAddress",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "getNFTDetails",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "valor",
-        type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "isListed",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "listedNFTs",
-    outputs: [
-      {
-        internalType: "address",
-        name: "nftAddress",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "_tokenURI",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "_valor",
-        type: "uint256",
-      },
-    ],
-    name: "mintNFT",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "nftContract",
-    outputs: [
-      {
-        internalType: "contract NFTFactory",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "nftMappingList",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "valor",
-        type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "isListed",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes",
-        name: "",
-        type: "bytes",
-      },
-    ],
-    name: "onERC721Received",
-    outputs: [
-      {
-        internalType: "bytes4",
-        name: "",
-        type: "bytes4",
-      },
-    ],
-    stateMutability: "pure",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "owner",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "renounceOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "transferOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "withdrawFunds",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
+  "constructor(string _nftName, string _nftSymbol, string _contractURI)",
+  "function mintNFT(string memory _tokenURI, uint256 _valor) external",
+  "function buyNFT(address nftAddress, uint256 tokenId) external payable",
+  "function withdrawFunds() external",
+  "function getAllContractNFTs() external view returns (address[] memory, uint256[] memory, uint256[] memory, string[] memory)",
+  "function getNFTDetails(address nftAddress, uint256 tokenId) external view returns (uint256 valor, bool isListed)",
+  "function updateTokenURI(uint256 tokenId, string memory newURI) external",
+  "function onERC721Received(address, address, uint256, bytes calldata) external pure returns (bytes4)",
+  "event TokenAdded(address indexed nftAddress, uint256 indexed tokenId, uint256 price)",
+  "event Bought(address indexed nftAddress, uint256 indexed tokenId, address buyer, uint256 price)",
 ];
 
 function App() {
@@ -375,7 +32,7 @@ function App() {
   const [nftList, setNftList] = useState([]);
   const [marketPlaceVisible, setMarketPlaceVisible] = useState(true);
 
-const ownerAddress = import.meta.env.VITE_OWNER_ADDRESS; // Access the variable
+  const ownerAddress = import.meta.env.VITE_OWNER_ADDRESS; // Access the variable
 
   // name of chains
   const ChainIdToName = {
@@ -526,6 +183,33 @@ const ownerAddress = import.meta.env.VITE_OWNER_ADDRESS; // Access the variable
   // console.log('nft valor:', nftDetails[0].toNumber());
   // console.log('nft isListed:', nftDetails[1]);
 
+  async function fetchMetadata(tokenURI) {
+    try {
+      const response = await axios.get(tokenURI);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching metadata from ${tokenURI}:`, error);
+      throw error;
+    }
+  }
+
+  // Helper function to parse price from metadata
+  function parsePrice(metadata) {
+    const attributes = metadata.attributes || [];
+    const priceAttribute = attributes.find(
+      (attr) => attr.trait_type === "Price"
+    );
+    return priceAttribute ? priceAttribute.value : "Unknown";
+  }
+  
+  function parseName(metadata) {
+    const attributes = metadata.attributes || [];
+    const priceAttribute = attributes.find(
+      (attr) => attr.trait_type === "Price"
+    );
+    return priceAttribute ? priceAttribute.value : "Unknown";
+  }
+
   async function getMarketNFTs() {
     const provider = await getProvider();
 
@@ -537,24 +221,30 @@ const ownerAddress = import.meta.env.VITE_OWNER_ADDRESS; // Access the variable
           provider
         );
 
-        const [nftAddresses, tokenIds, valores] =
-          await contract.getAllContractNFTs();
+        const [nftAddresses, tokenIds, valores, tokenURIs] = await contract.getAllContractNFTs();
 
-        const NFTS_ADDRESSES = ["0x40980B5f4F7609fCD5A00426B6f7716CF5395A84"];
-
+        debugger
         // Use Promise.all to wait for all promises to resolve
         const nftListResponse = await Promise.all(
           nftAddresses.map(async (address, index) => {
             const nftDetails = await contract.getNFTDetails(
-              NFTS_ADDRESSES[0],
+              NFT_ADDRESS,
               tokenIds[index]
             );
             const isListed = nftDetails[1];
-
+            // pegando os dados do tokenURI
+            // Fetch the metadata JSON from tokenURI
+            const metadata = await fetchMetadata(tokenURIs[index]);
+            const price = parsePrice(metadata);
+            
             return {
               address: address,
+              name: metadata?.name,
+              description: metadata?.description,
+              image: metadata?.image,
               tokenId: tokenIds[index].toString(),
-              valor: valores[index].toNumber(),
+              tokenURI: tokenURIs[index].toString(),
+              valor: price,
               isListed,
             };
           })
@@ -660,7 +350,7 @@ const ownerAddress = import.meta.env.VITE_OWNER_ADDRESS; // Access the variable
           <section>
             <section className="actions">
               {/* Só irá exibir o botão para mintar para uma conta em específico */}
-              {account.toLowerCase() == ownerAddress.toLowerCase() && (
+              {account?.toLowerCase() == ownerAddress?.toLowerCase() && (
                 <button className="btn mint" onClick={handleMintNFT}>
                   Mint NFT
                 </button>
@@ -678,11 +368,11 @@ const ownerAddress = import.meta.env.VITE_OWNER_ADDRESS; // Access the variable
                   <div key={index} className="nft-card">
                     <img
                       src={nft.image}
-                      alt={`NFT ${index}`}
+                      alt={`NFT #${nft.tokenId}`}
                       className="nft-image"
                     />
                     <div className="nft-details">
-                      <h3 className="nft-title">{nft.tokenId}</h3>
+                      <h3 className="nft-title">{nft.name}</h3>
                       <p className="nft-price">Price: {nft.valor} POL</p>
                       <button
                         className="buy-button"
