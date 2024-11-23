@@ -371,7 +371,7 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [chainId, setChainId] = useState(null);
   const [balance, setBalance] = useState("");
-  const [statusMsg, setStatusMsg] = useState("");
+  const [message, setMessage] = useState("");
   const [nftList, setNftList] = useState([]);
 
   // name of chains
@@ -466,7 +466,7 @@ function App() {
       setBalance(balanceInEthFormatted);      
     } catch (error) {
       console.error("Failed to connect wallet:", error);
-      setStatusMsg(`Failed to connect ${error}`);
+      setMessage(`Failed to connect ${error}`);
       // necessário reconectar em caso de erro para forçar a conexão completa, pois muitas vezes a metamask não conecta corretamente.
       connectWallet();
     }
@@ -478,17 +478,17 @@ function App() {
     setChainId(null);
     setIsConnected(false);
     setBalance("");
-    setStatusMsg("Wallet disconnected");
+    setMessage("Wallet disconnected");
     console.log("Wallet disconnected");
   }
 
   async function handleMintNFT() {
     if (!contract) {
-      setStatusMsg("Conecte uma wallet.");
+      setMessage("Conecte uma wallet.");
       return;
     }
 
-    try {
+    try {      
       const tx = await contract.mintNFT(TOKEN_URI, 25);
       console.log("Mint NFT transaction:", tx);
       await tx.wait();
@@ -505,6 +505,13 @@ function App() {
     }
   }
 
+  // MY-TODO: GET NFT DETAILS
+  // const NFTS_ADDRESSES = ["0x81e3f429E3F85B5F7bd91CE50B839911cAe49013"];  
+  // const nftDetails = await contract.getNFTDetails(NFTS_ADDRESSES[0], 1);
+  // console.log('nft valor:', nftDetails[0].toNumber());
+  // console.log('nft isListed:', nftDetails[1]);
+
+
   async function getMarketNFTs() {
     const provider = await getProvider();
 
@@ -512,19 +519,14 @@ function App() {
       if (provider) {
         const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);  
         
-        // MY-TODO: GET NFT DETAILS
-        // const NFTS_ADDRESSES = ["0x81e3f429E3F85B5F7bd91CE50B839911cAe49013"];  
-        // const nftDetails = await contract.getNFTDetails(NFTS_ADDRESSES[0], 1);
-        // console.log('nft valor:', nftDetails[0].toNumber());
-        // console.log('nft isListed:', nftDetails[1]);
 
         const [nftAddresses, tokenIds, valores] = await contract.getAllContractNFTs();
-        
+        debugger
         const nftListResponse = nftAddresses.map((address, index) => ({
-          nftAddresses: address,
+          address: address,
           tokenId: tokenIds[index].toString(),
           //valor: ethers.utils.formatEther(valores[index])
-          valor: valores[index].toNumber()
+          valor: valores[index].toNumber(),
         }));
 
         console.log("Listados NFTs a venda:", nftListResponse);
@@ -535,8 +537,46 @@ function App() {
     }
   }
 
+  async function handleBuyNFT(nft) {
+    console.log("nft address", nft.address);
+    console.log("nft tokenId", nft.tokenId);
+    console.log("nft valor", nft.valor);
+
+    setMessage("processing purchase, please wait");
+
+    // const provider = await getProvider();
+
+    // try {
+    //   if (provider) {
+    //     const contract = new ethers.Contract(
+    //       CONTRACT_ADDRESS,
+    //       CONTRACT_ABI,
+    //       provider
+    //     );
+
+    //     if (isConnected == false) {
+    //       alert("Please connect your wallet to buy.");
+    //       return;
+    //     }
+
+
+
+    //     await contract.buyNFT(nft.address, nft.tokenId, {
+    //       value: nft.valor
+    //     });
+
+    //     alert("NFT purchased successfully");
+    //   }
+    // } catch (error) {
+    //   alert("error during nft purchase");
+    //   console.error("error during buy a nfts: ", error.message);
+    // }
+  }
+
   return (
     <div className="app">
+      {message && <div className="message">{message}</div>}
+      {/* Display the message */}
       <header className="header">
         <h1>TKN Marketplace</h1>
         <div className="wallet-info">
@@ -555,7 +595,6 @@ function App() {
           )}
         </div>
       </header>
-
       <main className="main-content">
         <section className="status">
           <p></p>
