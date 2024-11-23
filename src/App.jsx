@@ -535,8 +535,9 @@ function App() {
           provider
         );
 
-        const [nftAddresses, tokenIds, valores] = await contract.getAllContractNFTs();
-        
+        const [nftAddresses, tokenIds, valores] =
+          await contract.getAllContractNFTs();
+
         const NFTS_ADDRESSES = ["0x40980B5f4F7609fCD5A00426B6f7716CF5395A84"];
 
         // Use Promise.all to wait for all promises to resolve
@@ -557,8 +558,13 @@ function App() {
           })
         );
 
-        console.log("Listados NFTs a venda:", nftListResponse);
-        setNftList(nftListResponse);
+        // Filter only objects with isListed = true
+        const listedNFTs = nftListResponse.filter((nft) => nft.isListed);
+
+        console.log(listedNFTs);
+
+        console.log("Listados NFTs a venda:", listedNFTs);
+        setNftList(listedNFTs);
       }
     } catch (error) {
       console.error("error during load nfts: ", error.message);
