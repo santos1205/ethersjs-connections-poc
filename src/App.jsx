@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import "./App.css";
 
-const TOKEN_ADDRESS = "0xCc2cd7488d8EA2bB37AA53Fb633cf91d9DFcC582";
-const CONTRACT_ADDRESS = "0x84d3fc84Fca8d3Ad60E6b78d5dC4564204f5368A";
+const CONTRACT_ADDRESS = "0xE9436E39D744eBc67261B34210140ac86381C430";
 const TOKEN_URI =
   "https://green-obedient-minnow-170.mypinata.cloud/ipfs/QmSf6QQ9bf5BTC1eYZBM2Hkef7sa66Z2zhcDwBsi9o6T5i";
 
@@ -168,6 +167,11 @@ const CONTRACT_ABI = [
         name: "",
         type: "uint256[]",
       },
+      {
+        internalType: "string[]",
+        name: "",
+        type: "string[]",
+      },
     ],
     stateMutability: "view",
     type: "function",
@@ -273,7 +277,7 @@ const CONTRACT_ABI = [
     outputs: [
       {
         internalType: "uint256",
-        name: "price",
+        name: "valor",
         type: "uint256",
       },
       {
