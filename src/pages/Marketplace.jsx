@@ -1,11 +1,6 @@
-import { Routes, Route, useNavigate } from "react-router-dom";
-import "./App.css";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import axios from "axios";
-import Marketplace from "./pages/Marketplace";
-import MyPurchases from "./pages/MyPurchases";
-import NotFound from "./pages/NotFound"; 
 
 // Import pages or components for each route
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
@@ -26,7 +21,8 @@ const CONTRACT_ABI = [
   "event Bought(address indexed nftAddress, uint256 indexed tokenId, address buyer, uint256 price)",
 ];
 
-function App() {
+
+export default function Marketplace() {
   const [account, setAccount] = useState("");
   const [contract, setContract] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -35,14 +31,13 @@ function App() {
   const [message, setMessage] = useState("");
   const [nftList, setNftList] = useState([]);
   const [marketPlaceVisible, setMarketPlaceVisible] = useState(true);
-  const navigate = useNavigate();
-
-  const ownerAddress = import.meta.env.VITE_OWNER_ADDRESS; // Access the variable
 
   // name of chains
   const ChainIdToName = {
     80002: "Amoy",
   };
+
+  const ownerAddress = import.meta.env.VITE_OWNER_ADDRESS; // Access the variable
 
   function getChainName(chainId) {
     return ChainIdToName[chainId] || "Unknown Chain";
@@ -206,7 +201,7 @@ function App() {
     );
     return priceAttribute ? priceAttribute.value : "Unknown";
   }
-  
+
   async function getMarketNFTs() {
     const provider = await getProvider();
 
@@ -218,7 +213,8 @@ function App() {
           provider
         );
 
-        const [nftAddresses, tokenIds, valores, tokenURIs] = await contract.getAllContractNFTs();
+        const [nftAddresses, tokenIds, valores, tokenURIs] =
+          await contract.getAllContractNFTs();
 
         // Use Promise.all to wait for all promises to resolve
         const nftListResponse = await Promise.all(
@@ -232,7 +228,7 @@ function App() {
             // Fetch the metadata JSON from tokenURI
             const metadata = await fetchMetadata(tokenURIs[index]);
             const price = parsePrice(metadata);
-            
+
             return {
               address: address,
               name: metadata?.name,
@@ -303,70 +299,88 @@ function App() {
   }
 
   return (
-    // <div className="app">
-    //   <header className="header">
-    //     <h1>TKN Marketplace</h1>
-    //     {/* Add navigation links */}
-    //     <nav>
-    //       <a href="/">Marketplace</a>
-    //       <a href="/mypurchases">My Purchases</a>
-    //     </nav>
-    //   </header>
+    <div>
+      <main className="main-content">
+        <section className="status">
+          <p></p>
+        </section>
 
-    //   {/* Define routes here */}
-    //   <main className="main-content">
-    //     <Routes>
-    //       <Route path="/" element={<Marketplace />} />
-    //       <Route path="/mypurchases" element={<MyPurchases />} />
-    //       <Route path="*" element={<NotFound />} /> {/* Handle 404s */}
-    //     </Routes>
-    //   </main>
-    // </div>
-    <div className="app">
-      {message && (
-        <div className="message-box">
-          <p>{message}</p>
-        </div>
-      )}
-      {/* Display the message */}
-      <header className="header">
-        <h1>TKN Marketplace</h1>
-        <div className="wallet-info">
-          <div className="header-buttons">
-            <button className="btn" onClick={() => navigate("/")}>
-              Marketplace
-            </button>
-          </div>
-          <div className="header-buttons">
-            <button className="btn" onClick={() => navigate("/purchases")}>
-              My Purchases
-            </button>
-          </div>
-          {isConnected == true ? (
-            <>
-              <span className="account">{`Account: ${account}`}</span>
-              <span className="balance">{`Balance: ${balance} POL`}</span>
-              <button className="btn disconnect" onClick={disconnectWallet}>
-                Disconnect
-              </button>
-            </>
-          ) : (
-            <button className="btn connect" onClick={connectWallet}>
-              Connect Wallet
-            </button>
-          )}
-        </div>
-      </header>
-          <main className="main-content">
-            <Routes>
-              <Route path="/" element={<Marketplace />}></Route>
-              <Route path="/purchases" element={<MyPurchases />}></Route>
-            </Routes>
-          </main>
+        {/* Marketplace section */}
+        {marketPlaceVisible && (
+          <section>
+            <section className="actions">
+              {/* Só irá exibir o botão para mintar para uma conta em específico */}
+              {account?.toLowerCase() == ownerAddress?.toLowerCase() && (
+                <button className="btn mint" onClick={handleMintNFT}>
+                  Mint NFT
+                </button>
+              )}
+              {/* Add additional actions here */}
+            </section>
 
+            <div className="nft-label">
+              <h2>NFTs a Venda</h2>
+            </div>
 
+            <section className="nft-list">
+              <div className="nft-list">
+                {nftList.map((nft, index) => (
+                  <div key={index} className="nft-card">
+                    <img
+                      src={nft.image}
+                      alt={`NFT #${nft.tokenId}`}
+                      className="nft-image"
+                    />
+                    <div className="nft-details">
+                      <h3 className="nft-title">{nft.name}</h3>
+                      <p className="nft-price">Price: {nft.valor} POL</p>
+                      <button
+                        className="buy-button"
+                        onClick={() => handleBuyNFT(nft)}
+                      >
+                        comprar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </section>
+        )}
+
+        {/* My purchases section */}
+        {!marketPlaceVisible && (
+          <section>
+            <div className="nft-label">
+              <h2>My Purchases</h2>
+            </div>
+
+            <section className="nft-list">
+              <div className="nft-list">
+                {nftList.map((nft, index) => (
+                  <div key={index} className="nft-card">
+                    <img
+                      src={nft.image}
+                      alt={`NFT ${index}`}
+                      className="nft-image"
+                    />
+                    <div className="nft-details">
+                      <h3 className="nft-title">{nft.tokenId}</h3>
+                      <p className="nft-price">Price: {nft.valor} POL</p>
+                      <button
+                        className="buy-button"
+                        onClick={() => handleBuyNFT(nft)}
+                      >
+                        comprar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </section>
+        )}
+      </main>
     </div>
   );
 }
-
-export default App;
